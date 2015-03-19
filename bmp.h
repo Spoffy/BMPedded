@@ -1,17 +1,14 @@
 /**
   Library for reading BMP images and displaying them on LaFortuna
 **/
-#include "lcd.h"
+#include <stdint.h>
+#include <string.h>
+
+struct rectangle;
 
 typedef void (*bmp_need_more_bytes)(void * byteBuffer, size_t bufferSize);
 
 /* Structs need packing, as we load directly into them. */
-typedef struct {
-  bmp_need_more_bytes data_request_func;
-  uint16_t * imageDataRow;
-  bmp_image_info imageInfo;
-} bmp_image_loader_state;
-
 typedef struct {
   uint16_t fileIdentifier;
   uint32_t fileSize;
@@ -47,8 +44,15 @@ typedef struct {
   bmp_info_header dibHeader;
 } bmp_image_info;
 
+typedef struct {
+  bmp_need_more_bytes data_request_func;
+  uint16_t * imageDataRow;
+  bmp_image_info imageInfo;
+} bmp_image_loader_state;
+
+
 uint8_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc);
 
 uint8_t bmp_next_row(const bmp_image_loader_state * loaderState);
 
-uint8_t fill_rectangle_bmp(rectangle * area, const bmp_image_loader_state * loaderState);
+uint8_t fill_rectangle_bmp(struct rectangle * area, const bmp_image_loader_state * loaderState);
