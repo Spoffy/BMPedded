@@ -3,8 +3,7 @@
 **/
 #include <stdint.h>
 #include <string.h>
-
-struct rectangle;
+#include "lcd.h"
 
 typedef void (*bmp_need_more_bytes)(void * byteBuffer, size_t bufferSize);
 
@@ -55,4 +54,5 @@ uint8_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataR
 
 uint8_t bmp_next_row(const bmp_image_loader_state * loaderState);
 
-uint8_t fill_rectangle_bmp(struct rectangle * area, const bmp_image_loader_state * loaderState);
+/* Move this out to its own file, so that lcd.h isn't necessary for library usage? */
+uint8_t fill_rectangle_bmp(rectangle * area, const bmp_image_loader_state * loaderState);
