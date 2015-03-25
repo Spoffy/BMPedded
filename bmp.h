@@ -5,10 +5,19 @@
 #include <string.h>
 #include "lcd.h"
 
-typedef void (*bmp_need_more_bytes)(void * byteBuffer, size_t bufferSize);
+typedef enum {READ=0,SKIP=1} data_read_type_t;
 
-/* Structs need packing, as we load directly into them. */
 typedef struct {
+  void * buffer;
+  size_t bufferSize;
+  data_read_type_t readType;
+} bmp_data_request;
+
+typedef void (*bmp_need_more_bytes)(bmp_data_request * request);
+
+typedef enum {STATUS_OK=0} status_t; 
+
+typedef struct __attribute__ ((packed)) {
   uint16_t fileIdentifier;
   uint32_t fileSize;
   uint16_t reserved1;
@@ -16,7 +25,7 @@ typedef struct {
   uint32_t imageDataOffset;
 } bmp_file_header;
 
-typedef struct {
+typedef struct __attribute__ ((packed)) {
   uint32_t headerSize;
   uint16_t imageWidth;
   uint16_t imageHeight;
@@ -24,7 +33,7 @@ typedef struct {
   uint16_t bitsPerPixel;
 } bmp_core_header;
 
-typedef struct {
+typedef struct __attribute__ ((packed)) {
   uint32_t headerSize;
   int32_t imageWidth;
   int32_t imageHeight;
@@ -39,20 +48,18 @@ typedef struct {
 } bmp_info_header;
 
 typedef struct {
+  bmp_need_more_bytes data_request_func;
+  size_t rowSize;
+  uint16_t currentRow;
+  uint16_t * imageDataRow;
   bmp_file_header fileHeader;
   bmp_info_header dibHeader;
-} bmp_image_info;
-
-typedef struct {
-  bmp_need_more_bytes data_request_func;
-  uint16_t * imageDataRow;
-  bmp_image_info imageInfo;
 } bmp_image_loader_state;
 
 
-uint8_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc);
+status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc);
 
-uint8_t bmp_next_row(const bmp_image_loader_state * loaderState);
+status_t bmp_next_row(bmp_image_loader_state * loaderState);
 
 /* Move this out to its own file, so that lcd.h isn't necessary for library usage? */
-uint8_t fill_rectangle_bmp(rectangle * area, const bmp_image_loader_state * loaderState);
+status_t fill_rectangle_bmp(rectangle * area, const bmp_image_loader_state * loaderState);
