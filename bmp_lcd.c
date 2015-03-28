@@ -37,4 +37,5 @@ status_t display_segment_bmp(uint16_t x, uint16_t y, rectangle * area, bmp_image
     draw_row_bmp(x, currentY, rowWidth, (void*)(loaderState->imageDataRow+area->left));
     currentY--;
   }
+  return STATUS_OK;
 }
