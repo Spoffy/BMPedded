@@ -12,9 +12,9 @@ inline void draw_row_bmp(uint16_t x, uint16_t y, uint16_t width, uint16_t * data
     write_data16(y);
     write_cmd(MEMORY_WRITE);
     uint16_t rowPos;
-    for(rowPos = width; rowPos > 0; rowPos--) 
+    for(rowPos = 0; rowPos < width; rowPos++) 
     {
-      write_data16(data[rowPos-1]);
+      write_data16(data[rowPos]);
     }
 }
 
