@@ -10,7 +10,7 @@ typedef enum {READ=0,SKIP=1} data_read_type_t;
 typedef struct {
   void * buffer;
   size_t bufferSize;
-  data_read_type_t readType;
+  size_t dataOffset;
 } bmp_data_request;
 
 typedef void (*bmp_need_more_bytes)(bmp_data_request * request);
