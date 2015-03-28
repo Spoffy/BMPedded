@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "bmp.h"
-#include "ili934x.h"
 
 inline size_t calc_row_size(bmp_info_header * dibHeader) {
   /* Weird formula because BMP row sizes are padded up to a multiple of 4 bytes. */
@@ -33,6 +32,9 @@ status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes data
   return STATUS_OK;
 }
 
+/* Loads the row specified by currentRow of the loader state into the buffer 
+   And increments currentRow.
+*/
 status_t bmp_next_row(bmp_image_loader_state * loaderState) 
 {
   bmp_data_request data_request;
@@ -46,31 +48,3 @@ status_t bmp_next_row(bmp_image_loader_state * loaderState)
   return STATUS_OK;
 }
 
-inline void draw_row_bmp(uint16_t x, uint16_t y, uint16_t width, uint16_t * data)
-{
-    write_cmd(COLUMN_ADDRESS_SET);
-    write_data16(x);
-    write_data16(x+width);
-    write_cmd(PAGE_ADDRESS_SET);
-    write_data16(y);
-    write_data16(y);
-    write_cmd(MEMORY_WRITE);
-    uint16_t rowPos;
-    for(rowPos = width; rowPos > 0; rowPos--) 
-    {
-      write_data16(data[rowPos-1]);
-    }
-}
-
-status_t display_segment_bmp(uint16_t x, uint16_t y, rectangle * area, bmp_image_loader_state * loaderState)
-{
-  loaderState->currentRow = loaderState->dibHeader.imageHeight - area->bottom;
-  uint16_t rowWidth = (area->right - area->left);
-  uint16_t currentY = y + (area->bottom - area->top);
-  while(currentY > y)
-  {
-    bmp_next_row(loaderState);
-    draw_row_bmp(x, currentY, rowWidth, (void*)(loaderState->imageDataRow+area->left));
-    currentY--;
-  }
-}

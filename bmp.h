@@ -1,6 +1,10 @@
 /**
   Library for reading BMP images and displaying them on LaFortuna
 **/
+
+#ifndef BMP_IMAGE_HEADER
+#define BMP_IMAGE_HEADER
+
 #include <stdint.h>
 #include <string.h>
 #include "lcd.h"
@@ -61,5 +65,4 @@ status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes data
 
 status_t bmp_next_row(bmp_image_loader_state * loaderState);
 
-/* Move this out to its own file, so that lcd.h isn't necessary for library usage? */
-status_t display_segment_bmp(uint16_t x, uint16_t y, rectangle * area, bmp_image_loader_state * loaderState);
+#endif
