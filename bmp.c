@@ -41,7 +41,9 @@ status_t bmp_next_row(bmp_image_loader_state * loaderState)
 
   data_request.buffer = (void*)loaderState->imageDataRow;
   data_request.bufferSize = loaderState->rowSize;
-  data_request.dataOffset = loaderState->fileHeader.imageDataOffset + (uint32_t)loaderState->rowSize * loaderState->currentRow;
+  data_request.dataOffset = 
+    (loaderState->fileHeader.imageDataOffset + (uint32_t)loaderState->rowSize * loaderState->dibHeader.imageHeight)
+    - (uint32_t)loaderState->rowSize * loaderState->currentRow;
 
   loaderState->data_request_func(&data_request);
   loaderState->currentRow += 1;
