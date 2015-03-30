@@ -4,6 +4,7 @@
 /* Draws a row of the imagei in reverse (because BMPs store their images upside down. */
 inline void draw_row_bmp(uint16_t rowWidth, uint16_t * data)
 {
+    /* Potentially slightly faster unrolled, but almost unnoticably so. */
     uint16_t rowPos;
     for(rowPos = 0; rowPos < rowWidth; rowPos++) 
     {
