@@ -57,16 +57,19 @@ status_t bmp_next_row(bmp_image_loader_state * loaderState)
 
     data_request.buffer = (void*)loaderState->imageData;
     data_request.bufferSize = loaderState->cacheSizeBytes;
+    /* BMP stores image data backwards, counting back to the row we want to start the read at. */
     data_request.dataOffset = loaderState->endOfImage 
                               - (uint32_t)loaderState->rowSize * (uint32_t)(loaderState->currentRow + loaderState->cacheSizeRows);
 
     loaderState->data_request_func(&data_request);
     loaderState->cachedRows = loaderState->cacheSizeRows;
+    /* Move the row pointer forward to the start of the last row **/
     loaderState->rowData = loaderState->imageData + (loaderState->rowSize >> 1) * (loaderState->cacheSizeRows - 1);
   }
   else
   {
-    /* RowData is in 2 byte chunks (uint16), rowSize in bytes. Divide by 2. */
+    /* Moving down a row (which is backwards in memory)
+       RowData is in 2 byte chunks (uint16), rowSize in bytes. Divide by 2. */
     loaderState->rowData -= loaderState->rowSize >> 1;
   }
   --loaderState->cachedRows;
