@@ -6,30 +6,41 @@ inline size_t calc_row_size(bmp_info_header * dibHeader) {
   return (((dibHeader->bitsPerPixel * dibHeader->imageWidth) + 31) / 32) * 4;
 }
 
+uint16_t dataStatic[4096];
+
 /* Load in the headers and data necessary to start retrieving image data. */
 /* Grossly violates strict aliasing, so compile without it. */
-status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc)
+status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc, uint16_t maxCache)
 {
   bmp_data_request data_request;
 
   loaderState->data_request_func = dataRetrievalFunc;
 
+  /* Load in BMP file header */
   data_request.buffer = (void *)&loaderState->fileHeader;
   data_request.bufferSize = sizeof(bmp_file_header);
   data_request.dataOffset = 0;
 
   dataRetrievalFunc(&data_request);
 
-  /* For now, only support BMPINFOHEADER, as CORE doesn't have 16 bit color. */
+  /* Load in BMP DIB header
+     For now, only support BMPINFOHEADER, as CORE doesn't have 16 bit color. */
   data_request.buffer = (void *)&loaderState->dibHeader;
   data_request.bufferSize = sizeof(bmp_info_header);
   data_request.dataOffset = sizeof(bmp_file_header);
   dataRetrievalFunc(&data_request);
 
+  /* Calculating file constants */
+  loaderState->currentRow = 0;
   loaderState->rowSize = calc_row_size(&loaderState->dibHeader);
   loaderState->endOfImage = (loaderState->fileHeader.imageDataOffset + (uint32_t)loaderState->rowSize * loaderState->dibHeader.imageHeight);
-  loaderState->imageDataRow = (uint16_t *)malloc(loaderState->rowSize);
-  loaderState->currentRow = 0;
+  
+  /* Initialising the cache. Cache speeds up rendering when loading from block devices. */
+  loaderState->cachedRows = 0;
+  loaderState->cacheSizeRows = maxCache/loaderState->rowSize;
+  loaderState->cacheSizeBytes = loaderState->cacheSizeRows * loaderState->rowSize;
+  loaderState->imageData = (void *)malloc(loaderState->cacheSizeBytes);
+
   return STATUS_OK;
 }
 
@@ -38,15 +49,25 @@ status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes data
 */
 status_t bmp_next_row(bmp_image_loader_state * loaderState) 
 {
-  bmp_data_request data_request;
+  if(loaderState->cachedRows == 0)
+  {
+    bmp_data_request data_request;
 
-  data_request.buffer = (void*)loaderState->imageDataRow;
-  data_request.bufferSize = loaderState->rowSize;
-  //First half are constant for a given file.
-  data_request.dataOffset = loaderState->endOfImage 
-                            - (uint32_t)loaderState->rowSize * loaderState->currentRow;
+    data_request.buffer = (void*)loaderState->imageData;
+    data_request.bufferSize = loaderState->cacheSizeBytes;
+    data_request.dataOffset = loaderState->endOfImage 
+                              - (uint32_t)loaderState->rowSize * (uint32_t)(loaderState->currentRow + loaderState->cacheSizeRows);
 
-  loaderState->data_request_func(&data_request);
+    loaderState->data_request_func(&data_request);
+    loaderState->cachedRows = loaderState->cacheSizeRows;
+    loaderState->rowData = loaderState->imageData + (loaderState->rowSize >> 1) * (loaderState->cacheSizeRows - 1);
+  }
+  else
+  {
+    /* RowData is in 2 byte chunks (uint16), rowSize in bytes. Divide by 2. */
+    loaderState->rowData -= loaderState->rowSize >> 1;
+  }
+  --loaderState->cachedRows;
   loaderState->currentRow += 1;
   return STATUS_OK;
 }

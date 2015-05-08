@@ -55,7 +55,7 @@ status_t display_segment_bmp(uint16_t x, uint16_t y, rectangle * area, bmp_image
   while(y < targetY)
   {
     bmp_next_row(loaderState);
-    draw_row_bmp(rowWidth, loaderState->imageDataRow+area->left);
+    draw_row_bmp(rowWidth, loaderState->rowData+area->left);
     y++;
   }
   return STATUS_OK;

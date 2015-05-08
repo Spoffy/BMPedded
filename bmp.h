@@ -58,8 +58,16 @@ typedef struct {
   size_t rowSize;
   /** Current row, starting at 0 **/
   uint16_t currentRow;
-  /** Loaded image data for the given row **/
-  uint16_t * imageDataRow;
+  /** Number of rows currently cached **/
+  uint8_t cachedRows;
+  /** Cache Size in rows **/
+  uint16_t cacheSizeRows;
+  /** Cache Size in bytes **/
+  uint32_t cacheSizeBytes;
+  /** Loaded image data **/
+  uint16_t * imageData;
+  /** Current row data **/
+  uint16_t * rowData;
   /** End of the image data in the file **/
   uint32_t endOfImage;
   bmp_file_header fileHeader;
@@ -72,7 +80,7 @@ typedef struct {
  * @param (Output) Image loader in which to store information.
  * @param (Input) Function to load in image data.
 */
-status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc);
+status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc, uint16_t maxCache);
 
 /**
  * Loads in the next row of the image given by a particular loader
