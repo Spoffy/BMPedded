@@ -11,8 +11,10 @@
 typedef enum {READ=0,SKIP=1} data_read_type_t;
 
 typedef struct {
+  /** Buffer to load data into. */
   void * buffer;
   size_t bufferSize;
+  /** Offset of the data requested from the beginning of the image file */
   uint32_t dataOffset;
 } bmp_data_request;
 
@@ -59,9 +61,17 @@ typedef struct {
   bmp_info_header dibHeader;
 } bmp_image_loader_state;
 
-
+/**
+ * Initialises the image loader and loads in BMP files headers.
+ * 
+ * @param (Output) Image loader in which to store information.
+ * @param (Input) Function to load in image data.
+*/
 status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc);
 
+/**
+ * Loads in the next row of the image given by a particular loader
+*/
 status_t bmp_next_row(bmp_image_loader_state * loaderState);
 
 #endif
