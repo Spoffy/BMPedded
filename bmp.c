@@ -6,8 +6,6 @@ inline size_t calc_row_size(bmp_info_header * dibHeader) {
   return (((dibHeader->bitsPerPixel * dibHeader->imageWidth) + 31) / 32) * 4;
 }
 
-uint16_t dataStatic[4096];
-
 /* Load in the headers and data necessary to start retrieving image data. */
 /* Grossly violates strict aliasing, so compile without it. */
 status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes dataRetrievalFunc, uint16_t maxCache)
@@ -40,6 +38,10 @@ status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes data
   loaderState->cacheSizeRows = maxCache/loaderState->rowSize;
   loaderState->cacheSizeBytes = loaderState->cacheSizeRows * loaderState->rowSize;
   loaderState->imageData = (void *)malloc(loaderState->cacheSizeBytes);
+
+  if(loaderState->imageData == NULL) {
+    return STATUS_OUT_OF_MEMORY;
+  }
 
   return STATUS_OK;
 }

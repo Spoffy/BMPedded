@@ -20,7 +20,7 @@ typedef struct {
 
 typedef void (*bmp_need_more_bytes)(bmp_data_request * request);
 
-typedef enum {STATUS_OK=0} status_t; 
+typedef enum {STATUS_OK=0, STATUS_OUT_OF_MEMORY} status_t; 
 
 typedef struct __attribute__ ((packed)) {
   uint16_t fileIdentifier;
