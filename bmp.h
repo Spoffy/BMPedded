@@ -7,7 +7,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "lcd.h"
 
 typedef enum {READ=0,SKIP=1} data_read_type_t;
 
