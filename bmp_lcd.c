@@ -4,12 +4,27 @@
 /* Draws a row of the imagei in reverse (because BMPs store their images upside down. */
 inline void draw_row_bmp(uint16_t rowWidth, uint16_t * data)
 {
-    /* Potentially slightly faster unrolled, but almost unnoticably so. */
-    uint16_t rowPos;
-    for(rowPos = 0; rowPos < rowWidth; rowPos++) 
+    //Unrolled for optimisation.
+    int32_t rowPos = -1;
+    int32_t rowWidthModSegmentSize = rowWidth & 0x7;
+    int32_t rowSegmentEnd = rowWidth - rowWidthModSegmentSize;
+    while(rowPos < rowSegmentEnd-1)
     {
-      write_data16(data[rowPos]);
+      write_data16(data[++rowPos]);
+      write_data16(data[++rowPos]);
+      write_data16(data[++rowPos]);
+      write_data16(data[++rowPos]);
+      write_data16(data[++rowPos]);
+      write_data16(data[++rowPos]);
+      write_data16(data[++rowPos]);
+      write_data16(data[++rowPos]);
     }
+
+    while(rowPos < rowWidth - 1)
+    {
+      write_data16(data[++rowPos]);
+    }
+
 }
 
 inline void init_draw(uint16_t startX, uint16_t startY, uint16_t endX, uint16_t endY)
