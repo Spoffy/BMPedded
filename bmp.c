@@ -27,6 +27,7 @@ status_t init_bmp(bmp_image_loader_state * loaderState, bmp_need_more_bytes data
   dataRetrievalFunc(&data_request);
 
   loaderState->rowSize = calc_row_size(&loaderState->dibHeader);
+  loaderState->endOfImage = (loaderState->fileHeader.imageDataOffset + (uint32_t)loaderState->rowSize * loaderState->dibHeader.imageHeight);
   loaderState->imageDataRow = (uint16_t *)malloc(loaderState->rowSize);
   loaderState->currentRow = 0;
   return STATUS_OK;
@@ -41,9 +42,9 @@ status_t bmp_next_row(bmp_image_loader_state * loaderState)
 
   data_request.buffer = (void*)loaderState->imageDataRow;
   data_request.bufferSize = loaderState->rowSize;
-  data_request.dataOffset = 
-    (loaderState->fileHeader.imageDataOffset + (uint32_t)loaderState->rowSize * loaderState->dibHeader.imageHeight)
-    - (uint32_t)loaderState->rowSize * loaderState->currentRow;
+  //First half are constant for a given file.
+  data_request.dataOffset = loaderState->endOfImage 
+                            - (uint32_t)loaderState->rowSize * loaderState->currentRow;
 
   loaderState->data_request_func(&data_request);
   loaderState->currentRow += 1;

@@ -54,9 +54,14 @@ typedef struct __attribute__ ((packed)) {
 
 typedef struct {
   bmp_need_more_bytes data_request_func;
+  /** Size of a row in bytes **/
   size_t rowSize;
+  /** Current row, starting at 0 **/
   uint16_t currentRow;
+  /** Loaded image data for the given row **/
   uint16_t * imageDataRow;
+  /** End of the image data in the file **/
+  uint32_t endOfImage;
   bmp_file_header fileHeader;
   bmp_info_header dibHeader;
 } bmp_image_loader_state;
